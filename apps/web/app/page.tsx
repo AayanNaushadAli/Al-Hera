@@ -56,14 +56,30 @@ export default async function HomePage() {
     }
   }
 
-  // If STILL no user, then they truly don't exist (Wait for manual setup or show error)
+  // If STILL no user, AUTO-CREATE as STUDENT
   if (!dbUser) {
-    return (
-      <div className="flex h-screen items-center justify-center flex-col space-y-4 text-zinc-500">
-        <p>Account not found. Please ask an Admin to create your profile.</p>
-        <p className="text-xs text-zinc-400">Your ID: {user.id}</p>
-      </div>
-    );
+    const userEmail = user.emailAddresses[0]?.emailAddress;
+    const userName = user.fullName || user.firstName || "New Student";
+
+    // Create User with STUDENT role
+    dbUser = await prisma.user.create({
+      data: {
+        clerkId: user.id,
+        email: userEmail || `${user.id}@placeholder.com`,
+        fullName: userName,
+        role: "STUDENT"
+      }
+    });
+
+    // Also create a Student profile linked to this user
+    await prisma.student.create({
+      data: {
+        userId: dbUser.id,
+        fullName: userName,
+        admissionNo: `AUTO-${Date.now()}`, // Temporary admission number
+        // classId not set - Admin will assign later
+      }
+    });
   }
 
   // 🚦 REDIRECT BASED ON ROLE
