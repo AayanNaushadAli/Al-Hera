@@ -14,8 +14,8 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
   // 1. Fetch Student, Classes, AND Parents
   const [student, classes, parents] = await Promise.all([
     prisma.student.findUnique({
-        where: { id: studentId },
-        include: { user: true }
+      where: { id: studentId },
+      include: { user: true }
     }),
     prisma.class.findMany(),
     prisma.parent.findMany({ orderBy: { fullName: 'asc' } }) // Fetch parents alphabetically
@@ -39,9 +39,12 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
-      <form action={updateStudent} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
+      <form action={async (formData) => {
+        "use server";
+        await updateStudent(formData);
+      }} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
         <input type="hidden" name="id" value={student.id} />
-        
+
         {/* PERSONAL DETAILS */}
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider">Student Details</h3>
@@ -60,8 +63,8 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
             <input name="email" defaultValue={student.user?.email} required type="email" className="w-full px-4 py-2 border border-zinc-200 rounded-lg" />
           </div>
           <div className="space-y-2">
-             <label className="text-sm font-medium text-zinc-700">Admission Number</label>
-             <input name="admissionNo" defaultValue={student.admissionNo} required type="text" className="w-full px-4 py-2 border border-zinc-200 rounded-lg" />
+            <label className="text-sm font-medium text-zinc-700">Admission Number</label>
+            <input name="admissionNo" defaultValue={student.admissionNo} required type="text" className="w-full px-4 py-2 border border-zinc-200 rounded-lg" />
           </div>
         </div>
 
@@ -72,7 +75,7 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
           <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider">Academic Info</h3>
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-700">Assign Class</label>
-            <select 
+            <select
               name="classId"
               defaultValue={student.classId || ""}
               className="w-full px-4 py-2 border border-zinc-200 rounded-lg bg-white"
@@ -94,7 +97,7 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
           <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider">Guardian Info</h3>
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-700">Link Parent</label>
-            <select 
+            <select
               name="parentId"
               defaultValue={student.parentId || ""}
               className="w-full px-4 py-2 border border-zinc-200 rounded-lg bg-white"
@@ -107,13 +110,13 @@ export default async function EditStudentPage({ params }: { params: Promise<{ id
               ))}
             </select>
             <p className="text-xs text-zinc-500">
-                Don't see the parent? <Link href="/admin/parents/new" className="text-blue-600 hover:underline">Create one here</Link>.
+              Don't see the parent? <Link href="/admin/parents/new" className="text-blue-600 hover:underline">Create one here</Link>.
             </p>
           </div>
         </div>
 
         <div className="pt-4">
-            <SubmitButton label="Update Student Profile" />
+          <SubmitButton label="Update Student Profile" />
         </div>
       </form>
     </div>

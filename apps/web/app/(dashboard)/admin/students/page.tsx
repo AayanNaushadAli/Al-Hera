@@ -6,10 +6,10 @@ import { Plus, Search, Pencil, Trash2, User } from "lucide-react";
 export default async function StudentsPage() {
   const students = await prisma.student.findMany({
     orderBy: { id: 'desc' },
-    include: { 
+    include: {
       user: true,
-      class: true 
-    } 
+      class: true
+    }
   });
 
   return (
@@ -20,8 +20,8 @@ export default async function StudentsPage() {
           <h1 className="text-2xl font-bold text-zinc-900">Students</h1>
           <p className="text-zinc-500">Manage student enrollments.</p>
         </div>
-        <Link 
-          href="/admin/students/new" 
+        <Link
+          href="/admin/students/new"
           className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-800 transition"
         >
           <Plus size={16} />
@@ -32,9 +32,9 @@ export default async function StudentsPage() {
       {/* SEARCH BAR */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-        <input 
-          type="text" 
-          placeholder="Search by name or admission no..." 
+        <input
+          type="text"
+          placeholder="Search by name or admission no..."
           className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5"
         />
       </div>
@@ -85,21 +85,24 @@ export default async function StudentsPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      
+
                       {/* EDIT BUTTON */}
-                      <Link 
-                        href={`/admin/students/${student.id}`} 
+                      <Link
+                        href={`/admin/students/${student.id}`}
                         className="p-2 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                       >
                         <Pencil size={18} />
                       </Link>
 
                       {/* DELETE BUTTON */}
-                      <form action={deleteStudent}>
+                      <form action={async (formData) => {
+                        "use server";
+                        await deleteStudent(formData);
+                      }}>
                         <input type="hidden" name="id" value={student.id} />
-                        <button 
-                            type="submit"
-                            className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                        <button
+                          type="submit"
+                          className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                         >
                           <Trash2 size={18} />
                         </button>

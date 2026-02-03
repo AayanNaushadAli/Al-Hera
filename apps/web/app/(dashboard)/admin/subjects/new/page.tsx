@@ -21,23 +21,26 @@ export default async function AddSubjectPage() {
         </div>
       </div>
 
-      <form action={createSubject} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
-        
+      <form action={async (formData) => {
+        "use server";
+        await createSubject(formData);
+      }} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
+
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-700">Subject Name</label>
-            <input 
-              name="name" 
-              required 
-              type="text" 
-              placeholder="e.g. Advanced Mathematics" 
-              className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5" 
+            <input
+              name="name"
+              required
+              type="text"
+              placeholder="e.g. Advanced Mathematics"
+              className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5"
             />
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-700">Assign to Class</label>
-            <select 
+            <select
               name="classId"
               required
               className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 bg-white"
@@ -53,8 +56,8 @@ export default async function AddSubjectPage() {
         </div>
 
         <div className="pt-4">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="w-full bg-black text-white font-medium py-3 rounded-lg hover:bg-zinc-800 transition flex items-center justify-center gap-2"
           >
             <Save size={18} />

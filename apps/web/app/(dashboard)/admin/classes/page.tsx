@@ -21,8 +21,8 @@ export default async function ClassesPage() {
           <h1 className="text-2xl font-bold text-zinc-900">Classes</h1>
           <p className="text-zinc-500">Manage academic grades and sections.</p>
         </div>
-        <Link 
-          href="/admin/classes/new" 
+        <Link
+          href="/admin/classes/new"
           className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-800 transition"
         >
           <Plus size={16} />
@@ -33,7 +33,7 @@ export default async function ClassesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {classes.length === 0 ? (
           <div className="col-span-full text-center py-12 text-zinc-500">
-             No classes found. Create one to get started.
+            No classes found. Create one to get started.
           </div>
         ) : (
           classes.map((cls) => (
@@ -48,7 +48,10 @@ export default async function ClassesPage() {
                 </div>
               </div>
 
-              <form action={deleteClass}>
+              <form action={async (formData) => {
+                "use server";
+                await deleteClass(formData);
+              }}>
                 <input type="hidden" name="id" value={cls.id} />
                 <button className="p-2 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
                   <Trash2 size={18} />

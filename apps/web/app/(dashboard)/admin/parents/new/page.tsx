@@ -15,18 +15,21 @@ export default function AddParentPage() {
         </div>
       </div>
 
-      <form action={createParent} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
-        
+      <form action={async (formData) => {
+        "use server";
+        await createParent(formData);
+      }} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
+
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-             <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">First Name</label>
-                <input name="name" required type="text" className="w-full px-4 py-2 border border-zinc-200 rounded-lg" />
-             </div>
-             <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Last Name</label>
-                <input name="surname" required type="text" className="w-full px-4 py-2 border border-zinc-200 rounded-lg" />
-             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700">First Name</label>
+              <input name="name" required type="text" className="w-full px-4 py-2 border border-zinc-200 rounded-lg" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700">Last Name</label>
+              <input name="surname" required type="text" className="w-full px-4 py-2 border border-zinc-200 rounded-lg" />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -41,8 +44,8 @@ export default function AddParentPage() {
         </div>
 
         <div className="pt-4">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="w-full bg-black text-white font-medium py-3 rounded-lg hover:bg-zinc-800 transition flex items-center justify-center gap-2"
           >
             <Save size={18} />

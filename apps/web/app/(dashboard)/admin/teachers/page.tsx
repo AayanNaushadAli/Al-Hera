@@ -87,7 +87,10 @@ export default async function TeachersPage() {
                                             </Link>
 
                                             {/* DELETE BUTTON (Form) */}
-                                            <form action={deleteTeacher}>
+                                            <form action={async (formData) => {
+                                                "use server";
+                                                await deleteTeacher(formData);
+                                            }}>
                                                 <input type="hidden" name="id" value={teacher.id} />
                                                 <button
                                                     type="submit"

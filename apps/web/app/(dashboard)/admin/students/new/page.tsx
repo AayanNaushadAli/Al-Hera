@@ -25,7 +25,10 @@ export default async function AddStudentPage() {
       </div>
 
       {/* FORM */}
-      <form action={createStudent} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
+      <form action={async (formData) => {
+        "use server";
+        await createStudent(formData);
+      }} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
 
         {/* Personal Details */}
         <div className="space-y-4">

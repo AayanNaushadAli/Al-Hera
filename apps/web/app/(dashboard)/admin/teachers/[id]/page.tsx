@@ -39,7 +39,10 @@ export default async function EditTeacherPage({ params }: { params: Promise<{ id
                 </div>
             </div>
 
-            <form action={updateTeacher} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
+            <form action={async (formData) => {
+                "use server";
+                await updateTeacher(formData);
+            }} className="bg-white border border-zinc-200 rounded-xl p-8 shadow-sm space-y-6">
                 {/* HIDDEN ID FIELD - Crucial for the update action to know WHO to update */}
                 <input type="hidden" name="id" value={teacher.id} />
 

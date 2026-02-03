@@ -18,8 +18,8 @@ export default async function SubjectsPage() {
           <h1 className="text-2xl font-bold text-zinc-900">Subjects</h1>
           <p className="text-zinc-500">Manage curriculum and courses.</p>
         </div>
-        <Link 
-          href="/admin/subjects/new" 
+        <Link
+          href="/admin/subjects/new"
           className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-800 transition"
         >
           <Plus size={16} />
@@ -30,9 +30,9 @@ export default async function SubjectsPage() {
       {/* SEARCH (Visual) */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-        <input 
-          type="text" 
-          placeholder="Search subjects..." 
+        <input
+          type="text"
+          placeholder="Search subjects..."
           className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5"
         />
       </div>
@@ -41,8 +41,8 @@ export default async function SubjectsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {subjects.length === 0 ? (
           <div className="col-span-full flex flex-col items-center justify-center py-12 text-zinc-500 gap-2">
-             <BookOpen size={32} className="opacity-20" />
-             <p>No subjects found. Add one to get started.</p>
+            <BookOpen size={32} className="opacity-20" />
+            <p>No subjects found. Add one to get started.</p>
           </div>
         ) : (
           subjects.map((subject) => (
@@ -60,7 +60,10 @@ export default async function SubjectsPage() {
               </div>
 
               {/* DELETE BUTTON */}
-              <form action={deleteSubject}>
+              <form action={async (formData) => {
+                "use server";
+                await deleteSubject(formData);
+              }}>
                 <input type="hidden" name="id" value={subject.id} />
                 <button className="p-2 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
                   <Trash2 size={18} />
