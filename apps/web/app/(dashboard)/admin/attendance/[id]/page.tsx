@@ -85,19 +85,20 @@ export default async function MarkAttendancePage({ params, searchParams }: {
                 </div>
 
                 {/* STUDENTS LIST */}
-                <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
-                    <table className="w-full text-sm text-left">
+                <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm overflow-x-auto">
+                    <table className="w-full text-sm text-left min-w-[600px]">
                         <thead className="bg-zinc-50 text-zinc-500 font-medium border-b border-zinc-200">
                             <tr>
-                                <th className="px-6 py-4">Student Name</th>
-                                <th className="px-6 py-4">Admission No</th>
-                                <th className="px-6 py-4 text-center">Status</th>
+                                <th className="px-4 md:px-6 py-4 w-16">Roll</th>
+                                <th className="px-4 md:px-6 py-4">Student Name</th>
+                                <th className="px-4 md:px-6 py-4">Admission No</th>
+                                <th className="px-4 md:px-6 py-4 text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-100">
                             {students.length === 0 ? (
                                 <tr>
-                                    <td colSpan={3} className="p-8 text-center text-zinc-400">
+                                    <td colSpan={4} className="p-8 text-center text-zinc-400">
                                         No students enrolled in this class.
                                     </td>
                                 </tr>
@@ -108,14 +109,17 @@ export default async function MarkAttendancePage({ params, searchParams }: {
 
                                     return (
                                         <tr key={student.id} className="hover:bg-zinc-50 transition">
-                                            <td className="px-6 py-4 font-medium text-zinc-900">
+                                            <td className="px-4 md:px-6 py-4 font-bold text-zinc-700">
+                                                {student.rollNumber || "-"}
+                                            </td>
+                                            <td className="px-4 md:px-6 py-4 font-medium text-zinc-900">
                                                 {student.fullName}
                                             </td>
-                                            <td className="px-6 py-4 text-zinc-500">
+                                            <td className="px-4 md:px-6 py-4 text-zinc-500">
                                                 {student.admissionNo}
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex justify-center gap-6">
+                                            <td className="px-4 md:px-6 py-4">
+                                                <div className="flex flex-col md:flex-row justify-center gap-2 md:gap-6">
                                                     {/* Radio: PRESENT */}
                                                     <label className="flex items-center gap-2 cursor-pointer group">
                                                         <input

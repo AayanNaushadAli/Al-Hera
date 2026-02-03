@@ -75,6 +75,7 @@ model Student {
   
   fullName    String
   admissionNo String   @unique
+  rollNumber  String?  // Class-specific roll number, NOT unique
   
   attendance  Attendance[]
   marks       Mark[]

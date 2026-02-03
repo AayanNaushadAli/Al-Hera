@@ -164,6 +164,7 @@ export async function createStudent(formData: FormData) {
     const surname = formData.get("surname") as string;
     const email = formData.get("email") as string;
     const admissionNo = formData.get("admissionNo") as string;
+    const rollNumber = formData.get("rollNumber") as string; // NEW
     const classId = formData.get("classId") as string; // Will be a string ID or empty
 
     const fullName = `${name} ${surname}`;
@@ -185,6 +186,7 @@ export async function createStudent(formData: FormData) {
                 userId: newUser.id,
                 fullName: fullName,
                 admissionNo: admissionNo,
+                rollNumber: rollNumber || null, // NEW: Save roll number
                 // Only connect a class if one was selected
                 classId: classId ? parseInt(classId) : null,
             },
