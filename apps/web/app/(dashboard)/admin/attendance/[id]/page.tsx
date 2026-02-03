@@ -128,7 +128,7 @@ export default async function AttendancePage({ params, searchParams }: PageProps
                                     return (
                                         <tr key={student.id} className="hover:bg-zinc-50/50">
                                             <td className="px-6 py-4 font-mono text-zinc-500">
-                                                {student.admissionNo}
+                                                {student.rollNumber || "-"}
                                             </td>
                                             <td className="px-6 py-4 font-medium text-zinc-900">
                                                 {student.fullName}

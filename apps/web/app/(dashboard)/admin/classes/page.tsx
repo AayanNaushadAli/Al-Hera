@@ -37,8 +37,8 @@ export default async function ClassesPage() {
           </div>
         ) : (
           classes.map((cls) => (
-            <div key={cls.id} className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm flex items-center justify-between">
-              <div>
+            <div key={cls.id} className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm flex items-center justify-between hover:border-zinc-300 transition">
+              <Link href={`/admin/classes/${cls.id}`} className="flex-1">
                 <h3 className="text-lg font-bold text-zinc-900">
                   {cls.name} <span className="text-zinc-400 font-normal text-sm">({cls.section || "No Section"})</span>
                 </h3>
@@ -46,7 +46,7 @@ export default async function ClassesPage() {
                   <Users size={16} />
                   <span>{cls._count.students} Students</span>
                 </div>
-              </div>
+              </Link>
 
               <form action={async (formData) => {
                 "use server";
