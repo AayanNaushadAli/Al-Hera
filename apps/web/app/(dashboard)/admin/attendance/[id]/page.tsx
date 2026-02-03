@@ -22,9 +22,9 @@ export default async function AttendancePage({ params, searchParams }: PageProps
 
     if (isNaN(classId)) redirect("/admin");
 
-    // 3. STRICT Date Logic: Ensure it is always a string
-    const dateStr: string = date ?? new Date().toISOString().split('T')[0];
-    const validDate: string = typeof dateStr === "string" ? dateStr : new Date().toISOString().split('T')[0];
+    // 3. Safe Date Logic: Use fallback if date is undefined
+    const dateStr = date ?? new Date().toISOString().split('T')[0];
+    const validDate = String(dateStr); // Ensure it's always a string
     const selectedDate = new Date(validDate);
 
     // 4. Fetch Data
