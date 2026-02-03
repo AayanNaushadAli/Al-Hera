@@ -1,175 +1,186 @@
+import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { markAttendance } from "@/lib/actions";
+import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, Calendar as CalendarIcon } from "lucide-react";
-import { notFound } from "next/navigation";
-import { SubmitButton } from "@/components/SubmitButton";
+import { ArrowLeft, Check, X, AlertCircle } from "lucide-react";
+import { revalidatePath } from "next/cache";
 
-export default async function MarkAttendancePage({ params, searchParams }: {
-    params: Promise<{ id: string }>,
-    searchParams: Promise<{ date?: string }>
-}) {
-    const { id } = await params;
-    const { date } = await searchParams; // Allow changing date via URL in future
+// 1. Define the props correctly for Next.js 15 (Promises)
+interface PageProps {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ date?: string }>;
+}
 
-    const classId = parseInt(id);
-    if (isNaN(classId)) return <div>Invalid Class ID</div>;
+export default async function AttendancePage({ params, searchParams }: PageProps) {
+  const user = await currentUser();
+  if (!user) redirect("/");
 
-    // Default to today or the URL date
-    const selectedDateStr = date || new Date().toISOString().split('T')[0];
-    const selectedDate = new Date(selectedDateStr);
+  // 2. Await the params and searchParams
+  const { id } = await params;
+  const { date } = await searchParams;
+  const classId = parseInt(id);
 
-    // 1. Fetch Class and Students first
-    const [classItem, students] = await Promise.all([
-        prisma.class.findUnique({ where: { id: classId } }),
-        prisma.student.findMany({
-            where: { classId: classId },
-            orderBy: { fullName: 'asc' }
-        })
-    ]);
+  if (isNaN(classId)) redirect("/admin");
 
-    if (!classItem) notFound();
+  // 3. STRICT Date Logic: Ensure it is always a string
+  const validDate = typeof date === "string" ? date : new Date().toISOString().split('T')[0];
+  const selectedDate = new Date(validDate);
 
-    // 2. Fetch Attendance (CORRECTED LOGIC HERE)
-    // We can't filter by classId directly, so we filter by the list of student IDs we just fetched.
-    const attendanceLogs = await prisma.attendance.findMany({
-        where: {
-            studentId: { in: students.map(s => s.id) }, // <--- THIS FIXED THE CRASH
-            date: {
-                gte: new Date(selectedDate.setHours(0, 0, 0, 0)), // Start of day
-                lt: new Date(selectedDate.setHours(23, 59, 59, 999)) // End of day
+  // 4. Fetch Data
+  const [classItem, students] = await Promise.all([
+    prisma.class.findUnique({
+      where: { id: classId },
+      include: { 
+        students: { 
+          orderBy: { fullName: 'asc' },
+          include: {
+            attendance: {
+               where: {
+                  date: {
+                    gte: new Date(selectedDate.setHours(0,0,0,0)),
+                    lt: new Date(selectedDate.setHours(23,59,59,999))
+                  }
+               }
             }
-        }
+          } 
+        } 
+      }
+    }),
+    prisma.student.findMany({
+      where: { classId: classId },
+      orderBy: { fullName: 'asc' }
+    })
+  ]);
+
+  if (!classItem) return <div>Class not found</div>;
+
+  // 5. Action to Save Attendance
+  async function saveAttendance(formData: FormData) {
+    "use server";
+    
+    // We need to re-parse the date inside the action because actions run separately
+    const dateRaw = formData.get("date") as string;
+    const targetDate = new Date(dateRaw || new Date());
+    
+    // Loop through all students to find their status in the form
+    const updates = students.map(student => {
+       const status = formData.get(`status-${student.id}`) as string;
+       
+       return prisma.attendance.upsert({
+          where: {
+             studentId_date: {
+                studentId: student.id,
+                date: targetDate
+             }
+          },
+          update: { status: status || "PRESENT" },
+          create: {
+             studentId: student.id,
+             date: targetDate,
+             status: status || "PRESENT"
+          }
+       });
     });
 
-    // 3. Create a quick lookup map: { studentId: "PRESENT" | "ABSENT" }
-    const attendanceMap: Record<number, string> = {};
-    attendanceLogs.forEach(log => {
-        attendanceMap[log.studentId] = log.status;
-    });
+    await Promise.all(updates);
+    revalidatePath(`/admin/attendance/${id}`);
+  }
 
-    return (
-        <div className="max-w-4xl mx-auto space-y-8">
-            {/* HEADER */}
-            <div className="flex items-center gap-4">
-                <Link href="/admin/attendance" className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-500 transition">
-                    <ArrowLeft size={20} />
-                </Link>
-                <div>
-                    <h1 className="text-2xl font-bold text-zinc-900">Mark Attendance</h1>
-                    <p className="text-zinc-500">
-                        Class: <span className="font-semibold text-black">{classItem.name} {classItem.section}</span>
-                    </p>
-                </div>
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+            <Link href="/admin" className="p-2 hover:bg-zinc-100 rounded-lg transition">
+                <ArrowLeft size={20} className="text-zinc-500" />
+            </Link>
+            <div>
+                <h1 className="text-2xl font-bold text-zinc-900">Mark Attendance</h1>
+                <p className="text-zinc-500">{classItem.name} • {validDate}</p>
             </div>
+        </div>
+      </div>
 
-            <form action={markAttendance} className="space-y-6">
-                <input type="hidden" name="classId" value={classId} />
-                <input type="hidden" name="date" value={selectedDateStr} /> {/* Hidden Date Field needed for Action */}
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+         <form action={saveAttendance} className="p-0">
+            <input type="hidden" name="date" value={validDate} />
+            
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                    <thead className="bg-zinc-50 border-b border-zinc-100 text-zinc-500 uppercase font-medium">
+                        <tr>
+                            <th className="px-6 py-4">Roll No</th>
+                            <th className="px-6 py-4">Student Name</th>
+                            <th className="px-6 py-4 text-center">Present</th>
+                            <th className="px-6 py-4 text-center">Absent</th>
+                            <th className="px-6 py-4 text-center">Late</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100">
+                        {students.map((student) => {
+                            // Find existing record for this student for today (if any)
+                            const existingRecord = classItem.students
+                                .find(s => s.id === student.id)
+                                ?.attendance[0];
+                                
+                            const currentStatus = existingRecord?.status || "PRESENT";
 
-                {/* DATE SELECTOR (Visual Only for now) */}
-                <div className="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm flex items-center gap-4 max-w-xs">
-                    <div className="bg-zinc-100 p-2 rounded-lg text-zinc-500">
-                        <CalendarIcon size={20} />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-zinc-500 uppercase">Date</label>
-                        <input
-                            type="date"
-                            name="date_display" // Changed name so it doesn't conflict with hidden field
-                            defaultValue={selectedDateStr}
-                            disabled // Disabled for now to prevent confusion until we add URL logic
-                            className="font-medium text-zinc-900 bg-transparent focus:outline-none opacity-50 cursor-not-allowed"
-                        />
-                    </div>
-                </div>
-
-                {/* STUDENTS LIST */}
-                <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm overflow-x-auto">
-                    <table className="w-full text-sm text-left min-w-[600px]">
-                        <thead className="bg-zinc-50 text-zinc-500 font-medium border-b border-zinc-200">
-                            <tr>
-                                <th className="px-4 md:px-6 py-4 w-16">Roll</th>
-                                <th className="px-4 md:px-6 py-4">Student Name</th>
-                                <th className="px-4 md:px-6 py-4">Admission No</th>
-                                <th className="px-4 md:px-6 py-4 text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-zinc-100">
-                            {students.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="p-8 text-center text-zinc-400">
-                                        No students enrolled in this class.
+                            return (
+                                <tr key={student.id} className="hover:bg-zinc-50/50">
+                                    <td className="px-6 py-4 font-mono text-zinc-500">
+                                        {student.admissionNo}
+                                    </td>
+                                    <td className="px-6 py-4 font-medium text-zinc-900">
+                                        {student.fullName}
+                                    </td>
+                                    
+                                    {/* Radio Buttons for Status */}
+                                    <td className="px-6 py-4 text-center">
+                                        <div className="flex justify-center">
+                                            <input 
+                                                type="radio" 
+                                                name={`status-${student.id}`} 
+                                                value="PRESENT" 
+                                                defaultChecked={currentStatus === "PRESENT"}
+                                                className="size-5 text-green-600 focus:ring-green-500 border-gray-300"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <div className="flex justify-center">
+                                            <input 
+                                                type="radio" 
+                                                name={`status-${student.id}`} 
+                                                value="ABSENT" 
+                                                defaultChecked={currentStatus === "ABSENT"}
+                                                className="size-5 text-red-600 focus:ring-red-500 border-gray-300"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        <div className="flex justify-center">
+                                            <input 
+                                                type="radio" 
+                                                name={`status-${student.id}`} 
+                                                value="LATE" 
+                                                defaultChecked={currentStatus === "LATE"}
+                                                className="size-5 text-yellow-500 focus:ring-yellow-400 border-gray-300"
+                                            />
+                                        </div>
                                     </td>
                                 </tr>
-                            ) : (
-                                students.map((student) => {
-                                    // Determine status: Use DB value, or default to PRESENT if nothing found
-                                    const currentStatus = attendanceMap[student.id] || "PRESENT";
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
 
-                                    return (
-                                        <tr key={student.id} className="hover:bg-zinc-50 transition">
-                                            <td className="px-4 md:px-6 py-4 font-bold text-zinc-700">
-                                                {student.rollNumber || "-"}
-                                            </td>
-                                            <td className="px-4 md:px-6 py-4 font-medium text-zinc-900">
-                                                {student.fullName}
-                                            </td>
-                                            <td className="px-4 md:px-6 py-4 text-zinc-500">
-                                                {student.admissionNo}
-                                            </td>
-                                            <td className="px-4 md:px-6 py-4">
-                                                <div className="flex flex-col md:flex-row justify-center gap-2 md:gap-6">
-                                                    {/* Radio: PRESENT */}
-                                                    <label className="flex items-center gap-2 cursor-pointer group">
-                                                        <input
-                                                            type="radio"
-                                                            name={`status_${student.id}`}
-                                                            value="PRESENT"
-                                                            className="accent-green-600 size-4 cursor-pointer"
-                                                            defaultChecked={currentStatus === "PRESENT"}
-                                                        />
-                                                        <span className="text-zinc-600 group-hover:text-green-700 font-medium">Present</span>
-                                                    </label>
-
-                                                    {/* Radio: ABSENT */}
-                                                    <label className="flex items-center gap-2 cursor-pointer group">
-                                                        <input
-                                                            type="radio"
-                                                            name={`status_${student.id}`}
-                                                            value="ABSENT"
-                                                            className="accent-red-600 size-4 cursor-pointer"
-                                                            defaultChecked={currentStatus === "ABSENT"}
-                                                        />
-                                                        <span className="text-zinc-600 group-hover:text-red-700 font-medium">Absent</span>
-                                                    </label>
-
-                                                    {/* Radio: LATE */}
-                                                    <label className="flex items-center gap-2 cursor-pointer group">
-                                                        <input
-                                                            type="radio"
-                                                            name={`status_${student.id}`}
-                                                            value="LATE"
-                                                            className="accent-orange-500 size-4 cursor-pointer"
-                                                            defaultChecked={currentStatus === "LATE"}
-                                                        />
-                                                        <span className="text-zinc-600 group-hover:text-orange-700 font-medium">Late</span>
-                                                    </label>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* SUBMIT BUTTON */}
-                <div className="flex justify-end">
-                    <SubmitButton label="Update Attendance" />
-                </div>
-            </form>
-        </div>
-    );
+            <div className="p-4 border-t border-zinc-100 bg-zinc-50 flex justify-end">
+                <button type="submit" className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 transition">
+                    Save Attendance
+                </button>
+            </div>
+         </form>
+      </div>
+    </div>
+  );
 }
