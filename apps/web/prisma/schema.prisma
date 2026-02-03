@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // NO URL HERE! (Handled by prisma.config.ts)
+}
+
+// 1. Users & Authentication
+model User {
+  id        Int      @id @default(autoincrement())
+  clerkId   String   @unique
+  email     String   @unique
+  
+  fullName  String?
+  
+  role      UserRole @default(STUDENT)
+  createdAt DateTime @default(now())
+
+  // Relations to Profiles
+  studentProfile Student?
+  teacherProfile Teacher?
+  parentProfile  Parent? 
+}
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+// 2. Academic Structure
+model Class {
+  id           Int      @id @default(autoincrement())
+  name         String   
+  section      String?
+  
+  // --- NEW FIELDS ---
+  capacity     Int      @default(30)
+  
+  // Link to a Teacher (Supervisor)
+  supervisorId Int?     
+  supervisor   Teacher? @relation("ClassSupervisor", fields: [supervisorId], references: [id]) 
+  // ------------------
+
+  students     Student[]
+  subjects     Subject[]
+  routines     ClassRoutine[]
+}
+
+
+model Subject {
+  id        Int      @id @default(autoincrement())
+  name      String   // Corresponds to subject_name
+  classId   Int
+  class     Class    @relation(fields: [classId], references: [id])
+
+  routines  ClassRoutine[]
+  marks     Mark[]
+}
+
+// 3. Profiles
+model Student {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  classId     Int?
+  class       Class?   @relation(fields: [classId], references: [id])
+  
+  parentId    Int?
+  parent      Parent?  @relation(fields: [parentId], references: [id])
+  
+  fullName    String
+  admissionNo String   @unique
+  
+  attendance  Attendance[]
+  marks       Mark[]
+}
+
+model Teacher {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  fullName       String
+  specialization String?
+  
+  routines       ClassRoutine[]
+  
+  // --- NEW FIELD ---
+  supervisedClasses Class[] @relation("ClassSupervisor")
+}
+
+model Parent {
+  id       Int       @id @default(autoincrement())
+  userId   Int       @unique
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName String
+  phone     String?
+  children Student[]
+}
+
+// 4. The "Engine" (Routine & Attendance)
+model ClassRoutine {
+  id        Int      @id @default(autoincrement())
+  classId   Int
+  class     Class    @relation(fields: [classId], references: [id])
+  
+  subjectId Int
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  
+  teacherId Int?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id])
+  
+  dayOfWeek String   // e.g. "Monday"
+  startTime DateTime // Prisma uses DateTime for time, usually mapped to 1970-01-01 HH:MM:SS
+  endTime   DateTime
+}
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  studentId Int
+  student   Student          @relation(fields: [studentId], references: [id])
+  
+  date      DateTime         @default(now())
+  status    AttendanceStatus
+  remarks   String?
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+// 5. Exams & Marks
+model Exam {
+  id    Int    @id @default(autoincrement())
+  name  String // e.g. "Mid-Term 2024"
+  term  String 
+  
+  marks Mark[]
+}
+
+model Mark {
+  id             Int     @id @default(autoincrement())
+  examId         Int
+  exam           Exam    @relation(fields: [examId], references: [id])
+  
+  studentId      Int
+  student        Student @relation(fields: [studentId], references: [id])
+  
+  subjectId      Int
+  subject        Subject @relation(fields: [subjectId], references: [id])
+  
+  marksObtained  Decimal @db.Decimal(5, 2)
+  totalMarks     Decimal @db.Decimal(5, 2)
+  grade          String?
+}

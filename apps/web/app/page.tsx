@@ -1,102 +1,82 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
+export default async function HomePage() {
+  const user = await currentUser();
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
-
-  return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
-
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
+  // --- SCENARIO 1: NOT LOGGED IN ---
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-zinc-50 space-y-4">
+        <h1 className="text-4xl font-bold text-zinc-900">School Management System</h1>
+        <p className="text-zinc-500">Please sign in to access your dashboard.</p>
+        <div className="flex gap-4">
+          <Link
+            href="/sign-in"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.dev/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
+            Sign In
+          </Link>
+          <Link
+            href="/sign-up"
+            className="px-6 py-3 bg-white text-zinc-900 border border-zinc-200 rounded-lg font-medium hover:bg-zinc-50 transition"
           >
-            Read our docs
-          </a>
+            Sign Up
+          </Link>
         </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.dev?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.dev →
-        </a>
-      </footer>
-    </div>
-  );
+      </div>
+    );
+  }
+
+  // --- SCENARIO 2: LOGGED IN (Check DB) ---
+
+  // A. Check by Clerk ID (The Normal Way)
+  let dbUser = await prisma.user.findUnique({
+    where: { clerkId: user.id }
+  });
+
+  // B. THE HEALER: If not found by ID, check by Email (The "Pending" Way)
+  if (!dbUser) {
+    const userEmail = user.emailAddresses[0]?.emailAddress;
+
+    if (userEmail) {
+      const pendingUser = await prisma.user.findUnique({
+        where: { email: userEmail }
+      });
+
+      // If we found a pending user (created by Admin), LINK THEM!
+      if (pendingUser) {
+        dbUser = await prisma.user.update({
+          where: { id: pendingUser.id },
+          data: { clerkId: user.id } // <--- Swap fake ID for Real ID
+        });
+      }
+    }
+  }
+
+  // If STILL no user, then they truly don't exist (Wait for manual setup or show error)
+  if (!dbUser) {
+    return (
+      <div className="flex h-screen items-center justify-center flex-col space-y-4 text-zinc-500">
+        <p>Account not found. Please ask an Admin to create your profile.</p>
+        <p className="text-xs text-zinc-400">Your ID: {user.id}</p>
+      </div>
+    );
+  }
+
+  // 🚦 REDIRECT BASED ON ROLE
+  switch (dbUser.role) {
+    case "ADMIN":
+      redirect("/admin");
+    case "TEACHER":
+      redirect("/teacher");
+    case "STUDENT":
+      redirect("/student");
+    case "PARENT":
+      redirect("/parent");
+    default:
+      return <div>Unknown Role</div>;
+  }
 }
