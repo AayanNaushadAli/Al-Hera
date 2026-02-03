@@ -40,15 +40,15 @@ export default async function StudentsPage() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
-        <table className="w-full text-sm text-left">
+      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm overflow-x-auto">
+        <table className="w-full text-sm text-left min-w-[600px]">
           <thead className="bg-zinc-50 text-zinc-500 font-medium border-b border-zinc-200">
             <tr>
-              <th className="px-6 py-4">Student Name</th>
-              <th className="px-6 py-4">Admission No</th>
-              <th className="px-6 py-4">Class</th>
-              <th className="px-6 py-4">Email</th>
-              <th className="px-6 py-4 text-right">Actions</th>
+              <th className="px-4 md:px-6 py-4">Student Name</th>
+              <th className="px-4 md:px-6 py-4">Admission No</th>
+              <th className="px-4 md:px-6 py-4">Class</th>
+              <th className="px-4 md:px-6 py-4 hidden sm:table-cell">Email</th>
+              <th className="px-4 md:px-6 py-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100">
@@ -69,22 +69,22 @@ export default async function StudentsPage() {
               // DATA STATE
               students.map((student) => (
                 <tr key={student.id} className="hover:bg-zinc-50 transition group">
-                  <td className="px-6 py-4 font-medium text-zinc-900">
+                  <td className="px-4 md:px-6 py-4 font-medium text-zinc-900">
                     {student.fullName}
                   </td>
-                  <td className="px-6 py-4 text-zinc-500">
+                  <td className="px-4 md:px-6 py-4 text-zinc-500">
                     {student.admissionNo}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
                       {student.class?.name || "No Class"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-zinc-500">
+                  <td className="px-4 md:px-6 py-4 text-zinc-500 hidden sm:table-cell">
                     {student.user?.email || "-"}
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-4 md:px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-1">
 
                       {/* EDIT BUTTON */}
                       <Link
