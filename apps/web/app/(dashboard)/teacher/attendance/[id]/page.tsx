@@ -11,7 +11,7 @@ export default async function TeacherMarkAttendancePage({ params }: { params: Pr
 
   if (isNaN(classId)) return <div>Invalid Class ID</div>;
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0]!;
   const selectedDate = new Date(today);
 
   // 1. Fetch Class and Students
@@ -57,7 +57,10 @@ export default async function TeacherMarkAttendancePage({ params }: { params: Pr
         </div>
       </div>
 
-      <form action={markAttendance} className="space-y-6">
+      <form action={async (formData) => {
+        "use server";
+        await markAttendance(formData);
+      }} className="space-y-6">
         <input type="hidden" name="classId" value={classId} />
         <input type="hidden" name="date" value={today} />
 
