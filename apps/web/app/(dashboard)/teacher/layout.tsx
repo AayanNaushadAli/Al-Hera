@@ -1,4 +1,4 @@
-import { checkRole } from "@/utils/roles"; // We'll make this helper in a second
+// Role check can be added here when utils/roles is implemented
 import TeacherSidebar from "@/components/TeacherSidebar"; // We'll make this too
 import { redirect } from "next/navigation";
 
@@ -11,7 +11,7 @@ export default async function TeacherLayout({
   // (We will create a helper for this so we don't repeat code)
   // For now, let's assume if they hit this route, we check their role manually or via middleware.
   // We'll stick to a simple check inside the page for now to keep it easy.
-  
+
   return (
     <div className="flex h-screen bg-zinc-50">
       {/* DIFFERENT SIDEBAR FOR TEACHERS */}
