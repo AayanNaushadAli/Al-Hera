@@ -13,14 +13,14 @@ export default async function TeachersPage() {
     return (
         <div className="space-y-6">
             {/* HEADER */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-zinc-900">Teachers</h1>
                     <p className="text-zinc-500">Manage your school's faculty.</p>
                 </div>
                 <Link
                     href="/admin/teachers/new"
-                    className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-800 transition"
+                    className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-800 transition w-fit"
                 >
                     <Plus size={16} />
                     Add Teacher
@@ -38,14 +38,14 @@ export default async function TeachersPage() {
             </div>
 
             {/* TABLE */}
-            <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-sm text-left">
+            <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm overflow-x-auto">
+                <table className="w-full text-sm text-left min-w-[500px]">
                     <thead className="bg-zinc-50 text-zinc-500 font-medium border-b border-zinc-200">
                         <tr>
-                            <th className="px-6 py-4">Full Name</th>
-                            <th className="px-6 py-4">Specialization</th>
-                            <th className="px-6 py-4">Email</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
+                            <th className="px-4 md:px-6 py-4">Full Name</th>
+                            <th className="px-4 md:px-6 py-4 hidden sm:table-cell">Specialization</th>
+                            <th className="px-4 md:px-6 py-4 hidden sm:table-cell">Email</th>
+                            <th className="px-4 md:px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
@@ -66,17 +66,17 @@ export default async function TeachersPage() {
                             // DATA STATE
                             teachers.map((teacher) => (
                                 <tr key={teacher.id} className="hover:bg-zinc-50 transition group">
-                                    <td className="px-6 py-4 font-medium text-zinc-900">
+                                    <td className="px-4 md:px-6 py-4 font-medium text-zinc-900">
                                         {teacher.fullName}
                                     </td>
-                                    <td className="px-6 py-4 text-zinc-500">
+                                    <td className="px-4 md:px-6 py-4 text-zinc-500 hidden sm:table-cell">
                                         {teacher.specialization || "N/A"}
                                     </td>
-                                    <td className="px-6 py-4 text-zinc-500">
+                                    <td className="px-4 md:px-6 py-4 text-zinc-500 hidden sm:table-cell">
                                         {teacher.user?.email || "No Email"}
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
+                                    <td className="px-4 md:px-6 py-4 text-right">
+                                        <div className="flex items-center justify-end gap-1">
 
                                             {/* EDIT BUTTON */}
                                             <Link
