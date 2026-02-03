@@ -12,7 +12,7 @@ export default function AdminLayout({
 
       {/* --- MAIN CONTENT AREA --- */}
       {/* --- MAIN CONTENT AREA --- */}
-      <main className="flex-1 ml-0 md:ml-64 p-4 md:p-8 overflow-y-auto h-full">
+      <main className="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-14 md:pt-8 overflow-y-auto h-full">
         <div className="max-w-6xl mx-auto">
           {children}
         </div>

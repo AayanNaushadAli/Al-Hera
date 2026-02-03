@@ -15,14 +15,14 @@ export default async function StudentsPage() {
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">Students</h1>
           <p className="text-zinc-500">Manage student enrollments.</p>
         </div>
         <Link
           href="/admin/students/new"
-          className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-800 transition"
+          className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-zinc-800 transition w-fit"
         >
           <Plus size={16} />
           Add Student
