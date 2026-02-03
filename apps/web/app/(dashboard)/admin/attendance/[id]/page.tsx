@@ -74,11 +74,11 @@ export default async function AttendancePage({ params, searchParams }: PageProps
                         date: targetDate
                     }
                 },
-                update: { status: status || "PRESENT" },
+                update: { status: (status || "PRESENT") as "PRESENT" | "ABSENT" | "LATE" },
                 create: {
                     studentId: student.id,
                     date: targetDate,
-                    status: status || "PRESENT"
+                    status: (status || "PRESENT") as "PRESENT" | "ABSENT" | "LATE"
                 }
             });
         });
