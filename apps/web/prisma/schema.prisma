@@ -129,6 +129,8 @@ model Attendance {
   date      DateTime         @default(now())
   status    AttendanceStatus
   remarks   String?
+
+  @@unique([studentId, date])
 }
 
 enum AttendanceStatus {
