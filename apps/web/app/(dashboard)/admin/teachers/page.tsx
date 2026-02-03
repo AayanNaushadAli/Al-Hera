@@ -43,8 +43,8 @@ export default async function TeachersPage() {
                     <thead className="bg-zinc-50 text-zinc-500 font-medium border-b border-zinc-200">
                         <tr>
                             <th className="px-4 md:px-6 py-4">Full Name</th>
-                            <th className="px-4 md:px-6 py-4 hidden sm:table-cell">Specialization</th>
-                            <th className="px-4 md:px-6 py-4 hidden sm:table-cell">Email</th>
+                            <th className="px-4 md:px-6 py-4">Specialization</th>
+                            <th className="px-4 md:px-6 py-4">Email</th>
                             <th className="px-4 md:px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -69,10 +69,10 @@ export default async function TeachersPage() {
                                     <td className="px-4 md:px-6 py-4 font-medium text-zinc-900">
                                         {teacher.fullName}
                                     </td>
-                                    <td className="px-4 md:px-6 py-4 text-zinc-500 hidden sm:table-cell">
+                                    <td className="px-4 md:px-6 py-4 text-zinc-500">
                                         {teacher.specialization || "N/A"}
                                     </td>
-                                    <td className="px-4 md:px-6 py-4 text-zinc-500 hidden sm:table-cell">
+                                    <td className="px-4 md:px-6 py-4 text-zinc-500">
                                         {teacher.user?.email || "No Email"}
                                     </td>
                                     <td className="px-4 md:px-6 py-4 text-right">
