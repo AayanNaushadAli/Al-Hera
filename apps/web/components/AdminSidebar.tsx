@@ -51,9 +51,9 @@ export default function AdminSidebar() {
                 <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="size-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                            S
+                            A
                         </div>
-                        <span className="font-bold text-lg text-zinc-900 tracking-tight">SchoolSys</span>
+                        <span className="font-bold text-lg text-zinc-900 tracking-tight">Al-Hera</span>
                     </div>
                     {/* CLOSE BUTTON (Mobile Only) */}
                     <button onClick={() => setIsOpen(false)} className="md:hidden text-zinc-400 hover:text-red-500">

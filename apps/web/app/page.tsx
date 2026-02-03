@@ -9,8 +9,8 @@ export default async function HomePage() {
   // --- SCENARIO 1: NOT LOGGED IN ---
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-zinc-50 space-y-4">
-        <h1 className="text-4xl font-bold text-zinc-900">School Management System</h1>
+      <div className="flex flex-col items-center justify-center md:justify-center h-screen bg-zinc-50 space-y-4 pb-32 md:pb-0">
+        <h1 className="text-4xl font-bold text-zinc-900">Al-Hera</h1>
         <p className="text-zinc-500">Please sign in to access your dashboard.</p>
         <div className="flex gap-4">
           <Link
