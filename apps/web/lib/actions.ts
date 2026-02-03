@@ -51,7 +51,6 @@ export async function createTeacher(formData: FormData) {
             // 🅰️ USER IS NEW: Create the account
             user = await prisma.user.create({
                 data: {
-                    username: username, // Generated automatically
                     email: email,
                     fullName: fullName,
                     clerkId: `manual_entry_${Date.now()}`, // Placeholder ID
@@ -381,7 +380,7 @@ export async function createRoutine(formData: FormData) {
     const createDateFromTime = (timeStr: string) => {
         const [hours, minutes] = timeStr.split(":").map(Number);
         const date = new Date();
-        date.setHours(hours, minutes, 0, 0);
+        date.setHours(hours ?? 0, minutes ?? 0, 0, 0);
         return date;
     };
 
