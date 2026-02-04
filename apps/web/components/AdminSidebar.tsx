@@ -49,11 +49,44 @@ export default function AdminSidebar() {
                 ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
             `}>
                 <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="size-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                            A
+                    <div className="flex items-center gap-3 px-2">
+                        {/* The "Mountain A" Icon */}
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 shadow-sm shadow-indigo-200">
+                            <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="text-white"
+                            >
+                                {/* The Mountain Peak / Letter A */}
+                                <path
+                                    d="M12 3L3 19H21L12 3Z"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                                {/* The "Cave" / Crossbar break */}
+                                <path
+                                    d="M12 13V16"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
                         </div>
-                        <span className="font-bold text-lg text-zinc-900 tracking-tight">Al-Hera</span>
+
+                        {/* The Word Logo */}
+                        <div className="flex flex-col">
+                            <span className="text-xl font-bold tracking-tight text-zinc-900 leading-tight">
+                                Al-Hera
+                            </span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-500">
+                                School System
+                            </span>
+                        </div>
                     </div>
                     {/* CLOSE BUTTON (Mobile Only) */}
                     <button onClick={() => setIsOpen(false)} className="md:hidden text-zinc-400 hover:text-red-500">

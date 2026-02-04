@@ -1,66 +1,94 @@
 # School Management System (SMS) Roadmap
 
-## Phase 1: Project Setup & Architecture
-- [x] Initialize Monorepo (Next.js, Turborepo) <!-- id: 0 -->
-- [x] Configure Tailwind CSS & Shadcn UI <!-- id: 1 -->
-- [x] Set up Database (PostgreSQL + Prisma) <!-- id: 2 -->
-- [x] Design Database Schema (Initial) <!-- id: 3 -->
+## Phase 1: Project Setup & Architecture ✅
+- [x] Initialize Monorepo (Next.js, Turborepo)
+- [x] Configure Tailwind CSS
+- [x] Set up Database (PostgreSQL + Prisma on Neon)
+- [x] Design Database Schema
+- [x] Deploy to Vercel
 
-## Phase 2: Authentication & Roles
-- [x] Setup Auth Provider (Auth.js / Clerk) <!-- id: 4 -->
-- [x] Implement Role-Based Access Control (RBAC: Admin, Teacher, Student, Parent) <!-- id: 5 -->
-- [ ] Create Login/Signup Pages <!-- id: 6 -->
-- [x] Create Role-Specific Layouts/Dashboards (Admin: ✅, Teacher: ✅, Parent: ✅) <!-- id: 7 -->
+## Phase 2: Authentication & Roles ✅
+- [x] Setup Auth Provider (Clerk)
+- [x] Implement Role-Based Access Control (Admin, Teacher, Student, Parent)
+- [x] Create Login/Signup Pages (Clerk Hosted)
+- [x] Create Role-Specific Layouts/Dashboards
 
-## Phase 3: Academic Structure (Core)
-- [x] Create Class/Grade Management (CRUD Implemented) <!-- id: 8 -->
-- [x] Create Section Management (Integrated with Classes) <!-- id: 9 -->
-- [x] Create Subject Management (CRUD Implemented) <!-- id: 10 -->
-- [ ] Assign Subjects to Classes/Teachers (Partially done via Subject creation) <!-- id: 11 -->
+## Phase 3: Academic Structure ✅
+- [x] Create Class/Grade Management (CRUD + Delete with cascade)
+- [x] Create Section Management
+- [x] Create Subject Management (CRUD)
+- [x] Assign Class Supervisors (Teachers)
 
-## Phase 4: User Management
-- [x] Student Admission Module (Basic CRUD & Enrollment) <!-- id: 12 -->
-- [x] Teacher Directory & Profiles (Basic CRUD) <!-- id: 13 -->
-- [x] Parent Association (CRUD & Student Link) <!-- id: 14 -->
-- [x] Roll Number Field (Added, distinct from Admission No) <!-- id: 33 -->
-- [ ] Bulk Actions (Import/Export) <!-- id: 15 -->
+## Phase 4: User Management ✅
+- [x] Student Admission Module (CRUD)
+- [x] Teacher Directory & Profiles (CRUD)
+- [x] Parent Association (CRUD & Student Link)
+- [x] Roll Number Field (distinct from Admission No)
+- [x] Roll Number Editing (Class Details Page)
+- [ ] Bulk Import (CSV) - *Pending*
 
-## Phase 5: Teacher Portal
-- [x] Teacher Dashboard (Layout & Stats) <!-- id: 28 -->
-- [x] My Classes (View Assigned Classes) <!-- id: 29 -->
-- [x] My Schedule (View Timetable) <!-- id: 30 -->
-- [x] Mark Attendance (For Assigned Classes - Roll | Name | Status view) <!-- id: 31 -->
-- [ ] Gradebook (Enter Marks) <!-- id: 32 -->
+## Phase 5: Teacher Portal ✅
+- [x] Teacher Dashboard (Layout & Stats)
+- [x] My Classes (View Assigned Classes)
+- [x] My Schedule (View Timetable)
+- [x] Mark Attendance (For Assigned Classes)
+- [x] Mobile Hamburger Menu
 
-## Phase 6: Parent Portal (NEW)
-- [x] Parent Dashboard (Layout & Children List) <!-- id: 34 -->
-- [x] Child Details Page (Attendance & Marks) <!-- id: 35 -->
-- [x] Class Schedule View (For Child's Class) <!-- id: 36 -->
-- [x] Mobile Bottom Navigation <!-- id: 37 -->
+## Phase 6: Student Portal ✅
+- [x] Student Dashboard
+- [x] View Attendance Summary
+- [x] View Grades/Marks
 
-## Phase 7: Daily Operations
-- [x] Attendance System (Student Marking) <!-- id: 16 -->
-- [x] Admin Attendance View (Roll | Name | Admission | Status) <!-- id: 38 -->
-- [x] Timetable/Schedule Generator (Class Routine) <!-- id: 17 -->
-- [ ] Calendar & Events <!-- id: 18 -->
+## Phase 7: Parent Portal ✅
+- [x] Parent Dashboard (Layout & Children List)
+- [x] Child Details Page (Attendance & Marks)
+- [x] Class Schedule View
+- [x] Mobile Bottom Navigation
 
-## Phase 8: Examinations & Results
-- [x] Exam Scheduling & Types <!-- id: 19 -->
-- [ ] Grading System Configuration (GPA/Marks) <!-- id: 20 -->
-- [x] Result Entry (Quick Grid Entry) <!-- id: 21 -->
+## Phase 8: Daily Operations ✅
+- [x] Attendance System (Student Marking)
+- [x] Admin Attendance View (Roll | Name | Status)
+- [x] Timetable/Schedule Generator (Class Routine)
+- [ ] Calendar & Events - *Pending*
 
-## Phase 9: Finance & Administration
-- [ ] Fee Structure Configuration <!-- id: 22 -->
-- [ ] Fee Collection & Invoicing <!-- id: 23 -->
-- [ ] Expense Tracking <!-- id: 24 -->
+## Phase 9: Examinations & Results
+- [x] Exam Scheduling & Types
+- [x] Result Entry (Quick Grid Entry)
+- [ ] Grading System Configuration (GPA/Marks) - *Pending*
 
-## Phase 10: Communication & Extras
-- [ ] Notice Board <!-- id: 25 -->
-- [ ] Internal Messaging System <!-- id: 26 -->
-- [ ] Library Management (Basic) <!-- id: 27 -->
+## Phase 10: Finance & Administration
+- [ ] Fee Structure Configuration - *Pending*
+- [ ] Fee Collection & Invoicing - *Pending*
+- [ ] Expense Tracking - *Pending*
 
-## Phase 11: UI/UX Enhancements
-- [x] Mobile-First Responsive Design (Admin & Parent Portals) <!-- id: 39 -->
-- [x] Hamburger Menu for Admin Sidebar <!-- id: 40 -->
-- [x] Bottom Navigation for Parent Portal (Mobile) <!-- id: 41 -->
-- [x] Responsive Tables with Horizontal Scroll <!-- id: 42 -->
+## Phase 11: Communication & Extras
+- [ ] Notice Board - *Pending*
+- [ ] Internal Messaging System - *Pending*
+- [ ] Library Management - *Pending*
+
+## Phase 12: UI/UX Enhancements ✅
+- [x] Mobile-First Responsive Design (All Portals)
+- [x] Hamburger Menu (Admin & Teacher Sidebars)
+- [x] Bottom Navigation (Parent & Student Portals)
+- [x] Responsive Tables with Horizontal Scroll
+- [x] New Al-Hera Logo (Mountain A Icon)
+- [x] Homepage Mobile Position Fix
+
+---
+
+## Recently Completed
+| Feature | Date |
+|---------|------|
+| Delete Class with Cascade | Feb 4, 2026 |
+| Roll Number Editing Page | Feb 3, 2026 |
+| Mobile Responsive Tables | Feb 3, 2026 |
+| Teacher Sidebar Hamburger | Feb 4, 2026 |
+| Al-Hera Rebranding | Feb 4, 2026 |
+
+## Known Issues
+- None currently blocking
+
+## Future Enhancements
+1. CSV Bulk Import for Students
+2. Self-Registration with Class Selection
+3. Email Domain Whitelist

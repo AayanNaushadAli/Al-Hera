@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { createRoutine, deleteRoutine } from "@/lib/actions"; // Import actions
+import { RoutineForm } from "@/components/forms/RoutineForm";
+import { DeleteForm } from "@/components/DeleteForm";
 import Link from "next/link";
-import { ArrowLeft, Plus, Trash2, Clock, BookOpen, User } from "lucide-react";
+import { ArrowLeft, Plus, Clock, BookOpen, User } from "lucide-react";
 import { notFound } from "next/navigation";
 
 export default async function ClassSchedulePage({ params }: { params: Promise<{ id: string }> }) {
@@ -83,16 +84,7 @@ export default async function ClassSchedulePage({ params }: { params: Promise<{ 
                         </div>
 
                         {/* DELETE BUTTON */}
-                        <form action={async (formData) => {
-                          "use server";
-                          await deleteRoutine(formData);
-                        }}>
-                          <input type="hidden" name="id" value={routine.id} />
-                          <input type="hidden" name="classId" value={classId} />
-                          <button className="text-zinc-300 hover:text-red-500 transition p-2">
-                            <Trash2 size={18} />
-                          </button>
-                        </form>
+                        <DeleteForm id={routine.id} action="routine" itemName={`${routine.subject.name} (${formatTime(routine.startTime)})`} />
                       </div>
                     ))
                   )}
@@ -109,50 +101,12 @@ export default async function ClassSchedulePage({ params }: { params: Promise<{ 
               <Plus size={20} /> Add Lesson
             </h3>
 
-            <form action={async (formData) => {
-              "use server";
-              await createRoutine(formData);
-            }} className="space-y-4">
-              <input type="hidden" name="classId" value={classId} />
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-500 uppercase">Day</label>
-                <select name="day" className="w-full p-2 border rounded-lg bg-white" required>
-                  {days.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">Start</label>
-                  <input type="time" name="startTime" className="w-full p-2 border rounded-lg" required />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">End</label>
-                  <input type="time" name="endTime" className="w-full p-2 border rounded-lg" required />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-500 uppercase">Subject</label>
-                <select name="subjectId" className="w-full p-2 border rounded-lg bg-white" required>
-                  {subjects.length === 0 ? <option value="">No Subjects Found</option> : null}
-                  {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-500 uppercase">Teacher (Optional)</label>
-                <select name="teacherId" className="w-full p-2 border rounded-lg bg-white">
-                  <option value="">-- No Teacher --</option>
-                  {teachers.map(t => <option key={t.id} value={t.id}>{t.fullName} ({t.specialization})</option>)}
-                </select>
-              </div>
-
-              <button type="submit" className="w-full bg-black text-white font-bold py-3 rounded-lg hover:bg-zinc-800 transition mt-2">
-                Add to Schedule
-              </button>
-            </form>
+            <RoutineForm
+              classId={classId}
+              days={days}
+              subjects={subjects}
+              teachers={teachers}
+            />
           </div>
         </div>
 

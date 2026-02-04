@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { deleteTeacher } from "@/lib/actions";
+import { DeleteForm } from "@/components/DeleteForm";
 import Link from "next/link";
-import { Plus, Search, Pencil, Trash2, User } from "lucide-react";
+import { Plus, Search, Pencil, User } from "lucide-react";
 
 export default async function TeachersPage() {
     // 1. Fetch teachers with their linked User account
@@ -86,19 +86,8 @@ export default async function TeachersPage() {
                                                 <Pencil size={18} />
                                             </Link>
 
-                                            {/* DELETE BUTTON (Form) */}
-                                            <form action={async (formData) => {
-                                                "use server";
-                                                await deleteTeacher(formData);
-                                            }}>
-                                                <input type="hidden" name="id" value={teacher.id} />
-                                                <button
-                                                    type="submit"
-                                                    className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </form>
+                                            {/* DELETE BUTTON with confirmation dialog */}
+                                            <DeleteForm id={teacher.id} action="teacher" itemName={teacher.fullName} />
 
                                         </div>
                                     </td>

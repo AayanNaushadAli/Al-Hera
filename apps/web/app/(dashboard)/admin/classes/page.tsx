@@ -1,15 +1,15 @@
 import { prisma } from "@/lib/prisma";
-import { deleteClass } from "@/lib/actions";
+import { DeleteForm } from "@/components/DeleteForm";
 import Link from "next/link";
-import { Plus, Trash2, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 
 export default async function ClassesPage() {
-  // 1. Fetch classes AND count how many students are in each
+  // Fetch classes AND count how many students are in each
   const classes = await prisma.class.findMany({
     orderBy: { name: 'asc' },
     include: {
       _count: {
-        select: { students: true } // This magically counts students!
+        select: { students: true }
       }
     }
   });
@@ -48,15 +48,8 @@ export default async function ClassesPage() {
                 </div>
               </Link>
 
-              <form action={async (formData) => {
-                "use server";
-                await deleteClass(formData);
-              }}>
-                <input type="hidden" name="id" value={cls.id} />
-                <button className="p-2 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
-                  <Trash2 size={18} />
-                </button>
-              </form>
+              {/* Delete with confirmation dialog */}
+              <DeleteForm id={cls.id} action="class" itemName={cls.name} />
             </div>
           ))
         )}

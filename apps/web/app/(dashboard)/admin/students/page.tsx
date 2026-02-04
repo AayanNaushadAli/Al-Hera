@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { deleteStudent } from "@/lib/actions"; // Import delete action
+import { DeleteForm } from "@/components/DeleteForm";
 import Link from "next/link";
-import { Plus, Search, Pencil, Trash2, User } from "lucide-react";
+import { Plus, Search, Pencil, User } from "lucide-react";
 
 export default async function StudentsPage() {
   const students = await prisma.student.findMany({
@@ -94,19 +94,8 @@ export default async function StudentsPage() {
                         <Pencil size={18} />
                       </Link>
 
-                      {/* DELETE BUTTON */}
-                      <form action={async (formData) => {
-                        "use server";
-                        await deleteStudent(formData);
-                      }}>
-                        <input type="hidden" name="id" value={student.id} />
-                        <button
-                          type="submit"
-                          className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </form>
+                      {/* DELETE BUTTON with confirmation dialog */}
+                      <DeleteForm id={student.id} action="student" itemName={student.fullName} />
 
                     </div>
                   </td>

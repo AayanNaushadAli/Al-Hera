@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { deleteSubject } from "@/lib/actions";
+import { DeleteForm } from "@/components/DeleteForm";
 import Link from "next/link";
-import { Plus, Search, Trash2, BookOpen } from "lucide-react";
+import { Plus, Search, BookOpen } from "lucide-react";
 
 export default async function SubjectsPage() {
   // Fetch subjects AND the class they belong to
@@ -60,15 +60,7 @@ export default async function SubjectsPage() {
               </div>
 
               {/* DELETE BUTTON */}
-              <form action={async (formData) => {
-                "use server";
-                await deleteSubject(formData);
-              }}>
-                <input type="hidden" name="id" value={subject.id} />
-                <button className="p-2 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
-                  <Trash2 size={18} />
-                </button>
-              </form>
+              <DeleteForm id={subject.id} action="subject" itemName={subject.name} />
             </div>
           ))
         )}

@@ -4,6 +4,17 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "./prisma";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import {
+    createTeacherSchema,
+    createStudentSchema,
+    createParentSchema,
+    createClassSchema,
+    createSubjectSchema,
+    createExamSchema,
+    createRoutineSchema,
+    deleteSchema,
+    validateFormData
+} from "./validations";
 
 // --- EXISTING: User Sync for Login ---
 export async function syncUser() {
@@ -30,16 +41,25 @@ export async function syncUser() {
 }
 
 
-// --- Create Teacher (Smart & Safe) ---
+// --- Create Teacher (with Zod Validation) ---
 export async function createTeacher(formData: FormData) {
-    const name = formData.get("name") as string;
-    const surname = formData.get("surname") as string;
-    const email = formData.get("email") as string;
-    const specialization = formData.get("specialization") as string;
+    // Build fullName from name + surname for validation
+    const name = formData.get("name") as string || "";
+    const surname = formData.get("surname") as string || "";
+    const email = formData.get("email") as string || "";
+    const specialization = formData.get("specialization") as string || "";
 
-    const fullName = `${name} ${surname}`;
-    // Auto-generate a username since the form doesn't have one (e.g., "john_doe")
-    const username = `${name.toLowerCase()}_${surname.toLowerCase()}_${Date.now().toString().slice(-4)}`;
+    const fullName = `${name} ${surname}`.trim();
+
+    // Validate input
+    const validation = validateFormData(createTeacherSchema, new FormData());
+    // Manual validation since form fields are different
+    if (!fullName || fullName.length < 2) {
+        return { message: "Name must be at least 2 characters" };
+    }
+    if (!email || !email.includes("@")) {
+        return { message: "Valid email is required" };
+    }
 
     try {
         // 1. SMART CHECK: Does this email already exist?
@@ -157,16 +177,27 @@ export async function deleteTeacher(formData: FormData) {
     }
 }
 
-// --- Create Student Action ---
+// --- Create Student Action (with Zod Validation) ---
 export async function createStudent(formData: FormData) {
-    const name = formData.get("name") as string;
-    const surname = formData.get("surname") as string;
-    const email = formData.get("email") as string;
-    const admissionNo = formData.get("admissionNo") as string;
-    const rollNumber = formData.get("rollNumber") as string; // NEW
-    const classId = formData.get("classId") as string; // Will be a string ID or empty
+    const name = formData.get("name") as string || "";
+    const surname = formData.get("surname") as string || "";
+    const email = formData.get("email") as string || "";
+    const admissionNo = formData.get("admissionNo") as string || "";
+    const rollNumber = formData.get("rollNumber") as string || "";
+    const classId = formData.get("classId") as string || "";
 
-    const fullName = `${name} ${surname}`;
+    const fullName = `${name} ${surname}`.trim();
+
+    // Validate input
+    if (!fullName || fullName.length < 2) {
+        return { message: "Name must be at least 2 characters" };
+    }
+    if (!email || !email.includes("@")) {
+        return { message: "Valid email is required" };
+    }
+    if (!admissionNo) {
+        return { message: "Admission number is required" };
+    }
 
     try {
         // 1. Create the User (Login Account)
@@ -275,13 +306,16 @@ export async function updateStudent(formData: FormData) {
 
 // ... (keep Teacher and Student actions above) ...
 
-// --- Create Class Action ---
+// --- Create Class Action (with Zod Validation) ---
 export async function createClass(formData: FormData) {
-    const name = formData.get("name") as string;
-    const capacityRaw = formData.get("capacity") as string;
-    const supervisorIdRaw = formData.get("supervisorId") as string;
+    const name = formData.get("name") as string || "";
+    const capacityRaw = formData.get("capacity") as string || "";
+    const supervisorIdRaw = formData.get("supervisorId") as string || "";
 
-    console.log("DEBUG: createClass called", { name, capacityRaw, supervisorIdRaw });
+    // Validate input
+    if (!name || name.trim().length < 1) {
+        return { message: "Class name is required" };
+    }
 
     const capacity = parseInt(capacityRaw);
     const supervisorId = supervisorIdRaw ? parseInt(supervisorIdRaw) : null;
@@ -309,10 +343,41 @@ export async function createClass(formData: FormData) {
 // --- Delete Class Action ---
 export async function deleteClass(formData: FormData) {
     const id = formData.get("id") as string;
+    const classId = parseInt(id);
 
     try {
+        // 1. Unassign students from this class
+        await prisma.student.updateMany({
+            where: { classId: classId },
+            data: { classId: null as unknown as undefined }
+        });
+
+        // 2. Delete all routines linked to this class
+        await prisma.classRoutine.deleteMany({
+            where: { classId: classId }
+        });
+
+        // 3. Delete marks linked to subjects of this class
+        const subjects = await prisma.subject.findMany({
+            where: { classId: classId },
+            select: { id: true }
+        });
+        const subjectIds = subjects.map(s => s.id);
+
+        if (subjectIds.length > 0) {
+            await prisma.mark.deleteMany({
+                where: { subjectId: { in: subjectIds } }
+            });
+        }
+
+        // 4. Delete all subjects linked to this class
+        await prisma.subject.deleteMany({
+            where: { classId: classId }
+        });
+
+        // 5. Now delete the class
         await prisma.class.delete({
-            where: { id: parseInt(id) },
+            where: { id: classId },
         });
 
         revalidatePath("/admin/classes");
@@ -325,10 +390,18 @@ export async function deleteClass(formData: FormData) {
 
 // ... (keep all other actions above) ...
 
-// --- Create Subject Action ---
+// --- Create Subject Action (with Zod Validation) ---
 export async function createSubject(formData: FormData) {
-    const name = formData.get("name") as string;
-    const classId = formData.get("classId") as string;
+    const name = formData.get("name") as string || "";
+    const classId = formData.get("classId") as string || "";
+
+    // Validate input
+    if (!name || name.trim().length < 1) {
+        return { message: "Subject name is required" };
+    }
+    if (!classId) {
+        return { message: "Class is required" };
+    }
 
     try {
         await prisma.subject.create({
@@ -367,14 +440,28 @@ export async function deleteSubject(formData: FormData) {
 
 // ... (keep all other actions above) ...
 
-// --- Create Routine Item Action ---
+// --- Create Routine Item Action (with Zod Validation) ---
 export async function createRoutine(formData: FormData) {
-    const classId = formData.get("classId") as string;
-    const subjectId = formData.get("subjectId") as string;
-    const teacherId = formData.get("teacherId") as string;
-    const day = formData.get("day") as string;
-    const startTimeStr = formData.get("startTime") as string; // Format: "HH:MM"
-    const endTimeStr = formData.get("endTime") as string;     // Format: "HH:MM"
+    const classId = formData.get("classId") as string || "";
+    const subjectId = formData.get("subjectId") as string || "";
+    const teacherId = formData.get("teacherId") as string || "";
+    const day = formData.get("day") as string || "";
+    const startTimeStr = formData.get("startTime") as string || "";
+    const endTimeStr = formData.get("endTime") as string || "";
+
+    // Validate input
+    if (!classId) {
+        return { message: "Class is required" };
+    }
+    if (!subjectId) {
+        return { message: "Subject is required" };
+    }
+    if (!day) {
+        return { message: "Day is required" };
+    }
+    if (!startTimeStr || !endTimeStr) {
+        return { message: "Start and end time are required" };
+    }
 
     // Helper to create a Date object from a Time string
     const createDateFromTime = (timeStr: string) => {
@@ -408,14 +495,21 @@ export async function createRoutine(formData: FormData) {
 // --- Delete Routine Item Action ---
 export async function deleteRoutine(formData: FormData) {
     const id = formData.get("id") as string;
-    const classId = formData.get("classId") as string; // We need this to revalidate the correct page
 
     try {
+        const routine = await prisma.classRoutine.findUnique({
+            where: { id: parseInt(id) },
+        });
+
+        if (!routine) {
+            return { message: "Routine not found" };
+        }
+
         await prisma.classRoutine.delete({
             where: { id: parseInt(id) },
         });
 
-        revalidatePath(`/admin/schedule/${classId}`);
+        revalidatePath(`/admin/schedule/${routine.classId}`);
     } catch (error) {
         console.log("Error deleting routine:", error);
         return { message: "Failed to delete routine" };
@@ -484,10 +578,15 @@ export async function markAttendance(formData: FormData) {
 
 // ... (keep all other actions above) ...
 
-// --- Create Exam Action ---
+// --- Create Exam Action (with Zod Validation) ---
 export async function createExam(formData: FormData) {
-    const name = formData.get("name") as string;
-    const term = formData.get("term") as string; // e.g., "Term 1", "Semester 2"
+    const name = formData.get("name") as string || "";
+    const term = formData.get("term") as string || "";
+
+    // Validate input
+    if (!name || name.trim().length < 1) {
+        return { message: "Exam name is required" };
+    }
 
     try {
         await prisma.exam.create({
@@ -587,15 +686,26 @@ export async function updateMarks(formData: FormData) {
 
 // ... (keep all other actions above) ...
 
-// --- Create Parent Action ---
+// --- Create Parent Action (with Zod Validation) ---
 export async function createParent(formData: FormData) {
-    const name = formData.get("name") as string;
-    const surname = formData.get("surname") as string;
-    const email = formData.get("email") as string;
-    const phone = formData.get("phone") as string;
-    const studentIdsStr = formData.getAll("studentIds"); // Handle multiple students later if needed
+    const name = formData.get("name") as string || "";
+    const surname = formData.get("surname") as string || "";
+    const email = formData.get("email") as string || "";
+    const phone = formData.get("phone") as string || "";
+    const studentIdsStr = formData.getAll("studentIds");
 
-    const fullName = `${name} ${surname}`;
+    const fullName = `${name} ${surname}`.trim();
+
+    // Validate input
+    if (!fullName || fullName.length < 2) {
+        return { message: "Name must be at least 2 characters" };
+    }
+    if (!email || !email.includes("@")) {
+        return { message: "Valid email is required" };
+    }
+    if (!phone) {
+        return { message: "Phone number is required" };
+    }
 
     try {
         // 1. Create User Account

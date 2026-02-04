@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { deleteParent } from "@/lib/actions";
+import { DeleteForm } from "@/components/DeleteForm";
 import Link from "next/link";
-import { Plus, Search, Trash2, User, Phone } from "lucide-react";
+import { Plus, Search, User, Phone } from "lucide-react";
 
 export default async function ParentsPage() {
   const parents = await prisma.parent.findMany({
@@ -59,15 +59,7 @@ export default async function ParentsPage() {
                   </div>
                 </div>
 
-                <form action={async (formData) => {
-                  "use server";
-                  await deleteParent(formData);
-                }}>
-                  <input type="hidden" name="id" value={parent.id} />
-                  <button className="text-zinc-300 hover:text-red-500 transition">
-                    <Trash2 size={18} />
-                  </button>
-                </form>
+                <DeleteForm id={parent.id} action="parent" itemName={parent.fullName} />
               </div>
 
               <div className="mt-6 pt-4 border-t border-zinc-50 space-y-2">
