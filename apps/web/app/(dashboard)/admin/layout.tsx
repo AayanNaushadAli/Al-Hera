@@ -1,10 +1,16 @@
 import AdminSidebar from "@/components/AdminSidebar";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // 1. Get logged in user
+  const user = await currentUser();
+  if (!user) redirect("/");
+
   return (
     <div className="flex h-screen bg-zinc-50">
       {/* Use the new Smart Sidebar */}
